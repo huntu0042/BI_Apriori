@@ -11,50 +11,45 @@ from pprint import pprint
 데이터 불러오기
 input.txt 파일의 데이터를 불러와서 하나의 transaction으로 구분해서 list에 넣어 저장
 '''
-item_list = list()
+trxes = list()
 quantity_list = list()
 dict_item = {'apple':'1','beer':'2','chicken':'3','mango':'4','milk':'5','rice':'6'}
 dict_num = {'1':'apple','2':'beer','3':'chicken','4':'mango','5':'milk','6':'rice'}
-cost_dict = {}
+std_support = 15 #지지도 기준치
 
 def load_data():
-    global item_list,quantity_list
-    global cost_dict
+    global trxes,quantity_list
     ## sys.argv[]로 인수 넣어주면 자동으로 ' ' 인식함
-
-    print(item_list)
+    '''
+    with open("input.txt", 'r') as f:
+        input_data = f.read().split('\n')
+        trx_id = 1
+        for trx in input_data:
+            trx = trx.split('\t')
+            trxes.append(trx)
+            # print(str(trx_id) + ': ', trx)
+            trx_id += 1
+    '''
+    print(trxes)
     f = open('dataset-quantity.csv', 'r', encoding='utf-8')
     rdr = csv.reader(f)
     for line in rdr:
         count = 1
-        temp_item_list = []
+        temp_trxes = []
         temp_quantity = []
 
         for item in line:
             if count % 2 == 1:
-                temp_item_list.append(dict_item[item])
+                temp_trxes.append(dict_item[item])
             else:
                 temp_quantity.append(item)
             count = count + 1
-        item_list.append(temp_item_list)
+        trxes.append(temp_trxes)
         quantity_list.append(temp_quantity)
 
-    print(item_list)
+    print(trxes)
     print(quantity_list)
     f.close()
-
-
-    f = open('dataset-price.csv', 'r', encoding='utf-8')
-    rdr = csv.reader(f)
-    for line in rdr:
-        cost_dict[line[0]]=int(line[1])
-    f.close()
-    print(cost_dict)
-
-
-
-
-
 
 
 
@@ -65,10 +60,10 @@ def load_data():
 
 
 def generate_first_frequent_set():
-    global item_list
+    global trxes
     item_set = dict()
 
-    for trx in item_list:
+    for trx in trxes:
         for item in trx:
             if item not in item_set.keys():
                 item_set[item] = 1
@@ -86,26 +81,11 @@ Minimum support 기준에 만족하지 않는 데이터 가지치기
 
 
 def filter_by_min_sup(candidate):
-    global item_list
-    ## 매번 min_sup을 비교할 때마다 value/len(item_list) 하는 것보다 min_sup를 count로 바꿔주면 효율적
-    min_sup_cnt = min_sup * len(item_list)
+    global trxes
+    ## 매번 min_sup을 비교할 때마다 value/len(trxes) 하는 것보다 min_sup를 count로 바꿔주면 효율적
+    min_sup_cnt = min_sup * len(trxes)
     ## for문 와중에 딕셔너리 사이즈가 변경 되면 안 되기에 삭제를 하지 못함 -> dict 안의 sub-dict을 뽑아냄
     frequent_set = {key: candidate[key] for key in candidate.keys() if candidate[key] >= min_sup_cnt}
-
-    ## min_sup을 만족하는 candidate가 하나라도 없으면 exit
-    if len(frequent_set) < 1:
-        print("Complete")
-        exit()
-    else:
-        return frequent_set
-
-#########cost 를 고려해서 min_sup 하기##############
-def filter_by_min_sup_cost(candidate,temp_cost_dict):
-    global item_list
-    ## 매번 min_sup을 비교할 때마다 value/len(item_list) 하는 것보다 min_sup를 count로 바꿔주면 효율적
-    min_sup_cnt = min_sup * calc_total_cost()
-    ## for문 와중에 딕셔너리 사이즈가 변경 되면 안 되기에 삭제를 하지 못함 -> dict 안의 sub-dict을 뽑아냄
-    frequent_set = {key: candidate[key] for key in candidate.keys() if temp_cost_dict[key] >= min_sup_cnt}
 
     ## min_sup을 만족하는 candidate가 하나라도 없으면 exit
     if len(frequent_set) < 1:
@@ -142,6 +122,7 @@ def self_join(length, previous_frequent_set):
     if length == 2:
         ## combination은 튜플을 반환하기 때문에 list로 바꿔준다
         return change_element_to_set(list(itertools.combinations(previous_frequent_set, length)))
+
     else:
         ## combination 하기 전에 identical한 길이가 1인 후보들을 뽑는다
         for item_set in previous_frequent_set:
@@ -162,10 +143,7 @@ downward closure property로 가지치기 -> 그 후, min Support로 가지치�
 
 
 def prune(length, previous_frequent_set, candidate):
-    global item_list
-
-    temp_cost_dict = {}
-
+    global trxes
     frequent_set = dict()
 
     ## 길이가 2일 때는 previous_frequent_set의 candidate 길이가 1이니 리스트 안의 리스트로 넣어준다
@@ -197,48 +175,19 @@ def prune(length, previous_frequent_set, candidate):
         if cnt == length:
             ## 다시 딕셔너리 키로 사용하기 위해 tuple로 변환해서 넣어준다
             frequent_set[tuple(item_set)] = 0
-            temp_cost_dict[tuple(item_set)] = 0
-
 
             ## k+1 frequent set을 DB Scan을 통해 count한다
     for key in frequent_set.keys():
-        for trx in item_list:
+        for trx in trxes:
             if set(key) <= set(trx):
                 frequent_set[key] = frequent_set[key] + 1
-                index = item_list.index(trx)
-                for item in key:
-                    item_index = trx.index(item)
-                    temp_cost_dict[key] = int(temp_cost_dict[key]) + int(quantity_list[index][item_index]) * int(cost_dict[num_to_item(item)])
-            print(temp_cost_dict)
-                ## 포함 되는 지는 여기서 체크됨
-    print(temp_cost_dict)
 
     ## 마지막으로 minimum suppport로 가지치기
-    return filter_by_min_sup_cost(frequent_set,temp_cost_dict),temp_cost_dict
+    return filter_by_min_sup(frequent_set)
 
 
 def num_to_item(num):
     return dict_num[num]
-
-def calc_one_item_cost(one_item,one_quantity):
-    cost = 0
-    cost = cost + int(cost_dict[num_to_item(one_item)]) * int(one_quantity)
-    return cost
-
-def calc_one_line_cost(one_line,one_qua_line):
-    cost = 0
-    for i in range(0,len(one_line)):
-        cost = cost + calc_one_item_cost(one_line[i],one_qua_line[i])
-    #print(cost)
-    return cost
-
-def calc_total_cost():
-    total_cost = 0
-    for i in range(0,len(item_list)):
-        total_cost = total_cost + calc_one_line_cost(item_list[i],quantity_list[i])
-    return total_cost
-
-
 '''
 frequent set을 대상으로 association rule을 적용한다
 - support count: A와 B가 전체 trx에서 같이 있을 확률
@@ -246,7 +195,7 @@ frequent set을 대상으로 association rule을 적용한다
 '''
 
 
-def apply_association_rule(length, frequent_set,temp_cost_dict):
+def apply_association_rule(length, frequent_set):
     for item_set, freq in frequent_set.items():
         frequent_set_len = length
 
@@ -259,13 +208,10 @@ def apply_association_rule(length, frequent_set,temp_cost_dict):
                 ## 차집합을 이용해서 반대편 조합을 저장해놓는다
                 counterpart = set(item_set) - set(item)
 
-                support = freq / len(item_list) * 100
-                #수정#
+                support = freq / len(trxes) * 100
 
-                support = int(temp_cost_dict[item_set]) / calc_total_cost() * 100
-                ##
                 cnt_item = 0
-                for trx in item_list:
+                for trx in trxes:
                     if set(trx) >= item:
                         cnt_item = cnt_item + 1
                 confidence = freq / cnt_item * 100
@@ -277,7 +223,7 @@ def apply_association_rule(length, frequent_set,temp_cost_dict):
                 item = set(map(num_to_item, item))
                 counterpart = set(map(num_to_item, counterpart))
 
-                line = '%15s' % str(item) + '\t' + '%15s' % str(counterpart) + '\t' + '%15s' % str('%.2f' % round(support, 2)) + '\t' + '%15s' % str(
+                line = '%20s' % str(item) + '\t' + '%20s' % str(counterpart) + '\t' + '%20s' % str('%.2f' % round(support, 2)) + '\t' + '%20s' % str(
                     '%.2f' % round(confidence, 2)) + '\n'
                 save_result(line)
 
@@ -297,10 +243,13 @@ def save_result(line):
 if __name__ == '__main__':
     # print("Number of arguments: ", len(sys.argv), 'arguments.')
     # print("Argument List: ", sys.argv, "\n\n")
-
+    with open("output.txt", 'w') as f:
+        f.close()
+    line = '%20s' % 'Item 1 ' + '\t' + '%20s' % 'Item2' + '\t' + '%20s' % 'Support' + '\t' + '%20s' % 'Confidence' + '\n'
+    save_result(line)
     ## arguments 리스트로 저장
     #argv = sys.argv
-    argv = ["","15","input.txt","output.txt"]
+    argv = ["",std_support,"input.txt","output.txt"]
 
     min_sup = float(argv[1]) / 100
     output = argv[3]
@@ -325,10 +274,10 @@ if __name__ == '__main__':
             exit()
 
         ## self join으로 뽑힌 candidate를 pruning 한다
-        candidate,temp_cost_dict = prune(length, previous_frequent_set, candidate)
+        candidate = prune(length, previous_frequent_set, candidate)
 
         ## prune이 끝난 candidate를 마지막으로 association rule에 적용시킨다
-        apply_association_rule(length, candidate,temp_cost_dict)
+        apply_association_rule(length, candidate)
         ## 더 이상 후보를 generate 못하면 exit
         if candidate == -1:
             exit()

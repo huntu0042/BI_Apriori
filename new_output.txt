@@ -1,0 +1,19 @@
+             Item 1 	               Item2	             Support	          Confidence
+            {'beer'}	           {'apple'}	               17.54	               58.65
+           {'apple'}	            {'beer'}	               17.54	               92.59
+           {'mango'}	           {'apple'}	               21.72	               60.00
+           {'apple'}	           {'mango'}	               21.72	                7.41
+            {'rice'}	            {'beer'}	               32.70	              100.00
+            {'beer'}	            {'rice'}	               32.70	               50.96
+            {'milk'}	            {'beer'}	               17.42	               92.31
+            {'beer'}	            {'milk'}	               17.42	               41.35
+         {'chicken'}	            {'rice'}	               18.85	              100.00
+            {'rice'}	         {'chicken'}	               18.85	               52.38
+            {'milk'}	            {'rice'}	               20.29	               76.92
+            {'rice'}	            {'milk'}	               20.29	               71.43
+    {'rice', 'milk'}	            {'beer'}	               29.83	               76.92
+    {'milk', 'beer'}	            {'rice'}	               29.83	               76.92
+    {'rice', 'beer'}	            {'milk'}	               29.83	               71.43
+            {'milk'}	    {'rice', 'beer'}	               29.83	               76.92
+            {'rice'}	    {'milk', 'beer'}	               29.83	               71.43
+            {'beer'}	    {'rice', 'milk'}	               29.83	               38.46

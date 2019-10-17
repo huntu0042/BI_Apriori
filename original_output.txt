@@ -1,0 +1,33 @@
+             Item 1 	               Item2	             Support	          Confidence
+            {'beer'}	           {'apple'}	               37.50	               50.00
+           {'apple'}	            {'beer'}	               37.50	               75.00
+            {'rice'}	           {'apple'}	               25.00	               50.00
+           {'apple'}	            {'rice'}	               25.00	               50.00
+            {'rice'}	            {'beer'}	               50.00	              100.00
+            {'beer'}	            {'rice'}	               50.00	               66.67
+            {'beer'}	         {'chicken'}	               25.00	               33.33
+         {'chicken'}	            {'beer'}	               25.00	              100.00
+            {'beer'}	            {'milk'}	               37.50	               50.00
+            {'milk'}	            {'beer'}	               37.50	               75.00
+            {'rice'}	         {'chicken'}	               25.00	               50.00
+         {'chicken'}	            {'rice'}	               25.00	              100.00
+            {'rice'}	            {'milk'}	               25.00	               50.00
+            {'milk'}	            {'rice'}	               25.00	               50.00
+    {'beer', 'rice'}	           {'apple'}	               25.00	               50.00
+   {'rice', 'apple'}	            {'beer'}	               25.00	              100.00
+   {'beer', 'apple'}	            {'rice'}	               25.00	               66.67
+            {'rice'}	   {'beer', 'apple'}	               25.00	               50.00
+            {'beer'}	   {'rice', 'apple'}	               25.00	               33.33
+           {'apple'}	    {'beer', 'rice'}	               25.00	               50.00
+    {'beer', 'rice'}	         {'chicken'}	               25.00	               50.00
+ {'rice', 'chicken'}	            {'beer'}	               25.00	              100.00
+ {'beer', 'chicken'}	            {'rice'}	               25.00	              100.00
+            {'rice'}	 {'beer', 'chicken'}	               25.00	               50.00
+            {'beer'}	 {'rice', 'chicken'}	               25.00	               33.33
+         {'chicken'}	    {'beer', 'rice'}	               25.00	              100.00
+    {'beer', 'rice'}	            {'milk'}	               25.00	               50.00
+    {'rice', 'milk'}	            {'beer'}	               25.00	              100.00
+    {'beer', 'milk'}	            {'rice'}	               25.00	               66.67
+            {'rice'}	    {'beer', 'milk'}	               25.00	               50.00
+            {'beer'}	    {'rice', 'milk'}	               25.00	               33.33
+            {'milk'}	    {'beer', 'rice'}	               25.00	               50.00
